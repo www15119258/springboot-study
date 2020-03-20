@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 @Entity
 @Table(name = "cms_post")
 public class Post implements Serializable {
@@ -52,6 +54,7 @@ public class Post implements Serializable {
 	/**
 	 * 发布日期
 	 */
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "publish_date")
 	private Date publishDate;
 	
