@@ -7,3 +7,8 @@ spring:
     password: root
   jpa:
     open-in-view: true
+    generate_ddl: true
+    properties:
+      hibernate:
+        id:
+          new_generator_mappings: false
