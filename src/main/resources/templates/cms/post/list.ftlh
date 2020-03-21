@@ -19,6 +19,8 @@
 		      	<template slot-scope="scope">
 		        	<el-button type="text" size="small" 
 		        		@click="edit(scope.row)">编辑</el-button>
+	        		<el-button type="text" size="small" 
+		        		@click="deleteRow(scope.row)">删除</el-button>
 		      	</template>
 		    </el-table-column>
 	    </el-table>
@@ -42,6 +44,22 @@
       			},
       			edit(row) {
       				window.location = '/cms/post/edit/' + row.id;
+      			},
+      			deleteRow(row) {
+      				this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+			          	confirmButtonText: '确定',
+			          	cancelButtonText: '取消',
+			          	type: 'warning'
+			        }).then(() => {
+			          	axios.delete('/cms/post/delete/' + row.id).then(() => {
+			          		window.location.reload();
+			          	});
+			        }).catch(() => {
+			          	this.$message({
+			            	type: 'info',
+			            	message: '已取消删除'
+			          	});          
+			        });
       			}
       		},
       		mounted() {
