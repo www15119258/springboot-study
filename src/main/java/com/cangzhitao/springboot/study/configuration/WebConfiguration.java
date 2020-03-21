@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -39,4 +40,14 @@ public class WebConfiguration extends WebMvcConfigurationSupport {
         converters.add(fastConverter);
     }
 
+	@Override
+	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/**")
+        	.addResourceLocations("classpath:/resources/")
+        	.addResourceLocations("classpath:/static/")
+        	.addResourceLocations("classpath:/public/");
+		super.addResourceHandlers(registry);
+	}
+
+	
 }

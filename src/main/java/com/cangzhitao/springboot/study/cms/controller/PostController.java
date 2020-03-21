@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.cangzhitao.springboot.study.cms.entities.Post;
 import com.cangzhitao.springboot.study.cms.repository.PostRepository;
@@ -61,6 +62,16 @@ public class PostController {
 			return false;
 		}
 		return true;
+	}
+	
+	@GetMapping(value = "list")
+	public ModelAndView list() {
+		return new ModelAndView("cms/post/list");
+	}
+	
+	@GetMapping(value = "findAll")
+	public Object findAll() {
+		return postRepository.findAll();
 	}
 
 }
