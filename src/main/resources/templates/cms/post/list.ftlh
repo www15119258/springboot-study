@@ -15,6 +15,12 @@
 	      	</el-table-column>
 	      	<el-table-column prop="author" label="作者">
 	      	</el-table-column>
+	      	<el-table-column label="操作" width="100">
+		      	<template slot-scope="scope">
+		        	<el-button type="text" size="small" 
+		        		@click="edit(scope.row)">编辑</el-button>
+		      	</template>
+		    </el-table-column>
 	    </el-table>
   	</div>
 </body>
@@ -33,6 +39,9 @@
       		methods: {
       			addPost() {
       				window.location = '/cms/post/add';
+      			},
+      			edit(row) {
+      				window.location = '/cms/post/edit/' + row.id;
       			}
       		},
       		mounted() {

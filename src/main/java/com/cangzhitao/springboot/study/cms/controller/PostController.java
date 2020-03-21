@@ -80,5 +80,10 @@ public class PostController {
 	public ModelAndView add() {
 		return new ModelAndView("cms/post/add");
 	}
+	
+	@GetMapping(value = "edit/{id}")
+	public ModelAndView edit(@PathVariable Long id) {
+		return new ModelAndView("cms/post/edit");
+	}
 
 }
