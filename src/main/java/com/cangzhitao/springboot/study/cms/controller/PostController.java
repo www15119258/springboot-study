@@ -1,5 +1,6 @@
 package com.cangzhitao.springboot.study.cms.controller;
 
+import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class PostController {
 	
 	@PostMapping(value = "save")
 	public Object save(@RequestBody Post post) {
+		post.setPublishDate(new Date());
 		postRepository.save(post);
 		return post;
 	}
@@ -72,6 +74,11 @@ public class PostController {
 	@GetMapping(value = "findAll")
 	public Object findAll() {
 		return postRepository.findAll();
+	}
+
+	@GetMapping(value = "add")
+	public ModelAndView add() {
+		return new ModelAndView("cms/post/add");
 	}
 
 }

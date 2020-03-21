@@ -7,14 +7,15 @@
 </head>
 <body>
 	<div id="app">
+		<el-button type="primary" @click="addPost();">新增文章</el-button>
     	<el-table :data="data">
-      	<el-table-column prop="title" label="标题">
-      	</el-table-column>
-      	<el-table-column prop="publishDate" label="发布日期" width="180">
-      	</el-table-column>
-      	<el-table-column prop="author" label="作者">
-      	</el-table-column>
-    </el-table>
+	      	<el-table-column prop="title" label="标题">
+	      	</el-table-column>
+	      	<el-table-column prop="publishDate" label="发布日期" width="180">
+	      	</el-table-column>
+	      	<el-table-column prop="author" label="作者">
+	      	</el-table-column>
+	    </el-table>
   	</div>
 </body>
   	<script src="/js/vue.js"></script>
@@ -28,6 +29,11 @@
         		return { 
         			data: []
         		}
+      		},
+      		methods: {
+      			addPost() {
+      				window.location = '/cms/post/add';
+      			}
       		},
       		mounted() {
       			axios.get('/cms/post/findAll').then((response) => {
