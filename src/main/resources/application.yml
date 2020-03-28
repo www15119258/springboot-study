@@ -8,6 +8,7 @@ spring:
   jpa:
     open-in-view: true
     generate_ddl: true
+    show_sql: true
     properties:
       hibernate:
         id:

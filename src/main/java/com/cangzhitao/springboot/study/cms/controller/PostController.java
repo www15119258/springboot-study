@@ -5,6 +5,10 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
+import org.springframework.data.domain.ExampleMatcher.StringMatcher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -87,6 +92,28 @@ public class PostController {
 		Sort sort = Sort.by(Direction.DESC, "publishDate");
 		Pageable pageable = PageRequest.of(page, size, sort);
 		return postRepository.findAll(pageable);
+	}
+	
+	@PostMapping(value = "findPage/{page}/{size}")
+	public Object findPage(@PathVariable int page, @PathVariable int size, 
+			@RequestParam(required = false) String author,
+			@RequestParam(required = false) String title) {
+		Sort sort = Sort.by(Direction.DESC, "publishDate");
+		Pageable pageable = PageRequest.of(page, size, sort);
+		Post post = new Post();
+		ExampleMatcher exampleMatcher = ExampleMatcher.matching(); 
+		if (author != null && !"".equals(author)) {
+			post.setAuthor(author);
+			exampleMatcher = exampleMatcher.withMatcher("author", 
+					GenericPropertyMatcher.of(StringMatcher.CONTAINING, false));
+		}
+		if (title != null && !"".equals(title)) {
+			post.setTitle(title);
+			exampleMatcher = exampleMatcher.withMatcher("title", 
+					GenericPropertyMatcher.of(StringMatcher.CONTAINING, false));
+		}
+		Example<Post> example = Example.of(post, exampleMatcher);
+		return postRepository.findAll(example, pageable);
 	}
 
 	@GetMapping(value = "add")
