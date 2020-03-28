@@ -24,6 +24,17 @@
 		      	</template>
 		    </el-table-column>
 	    </el-table>
+	    <div class="block">
+	    	<el-pagination
+  				@size-change="handleSizeChange"
+  				@current-change="handleCurrentChange"
+  				:current-page="currentPage"
+  				:page-sizes="[1, 2, 4]"
+  				:page-size="pageSize"
+  				layout="total, sizes, prev, pager, next, jumper"
+  				:total="total">
+	    	</el-pagination>
+	  	</div>
   	</div>
 </body>
   	<script src="/js/vue.js"></script>
@@ -35,7 +46,10 @@
       		el: '#app',
       		data: function() {
         		return { 
-        			data: []
+        			data: [],
+        			currentPage: 1,
+        			pageSize: 2,
+        			total: 0
         		}
       		},
       		methods: {
@@ -60,12 +74,24 @@
 			            	message: '已取消删除'
 			          	});          
 			        });
+      			},
+      			handleSizeChange(val) {
+      				this.pageSize = val;
+      				this.query();
+      			},
+      			handleCurrentChange(val) {
+      				this.currentPage = val;
+      				this.query();
+      			},
+      			query() {
+      				axios.get('/cms/post/findPage/' + (this.currentPage - 1) + '/' + this.pageSize).then((response) => {
+	      				this.data = response.data.content;
+	      				this.total = response.data.totalElements;
+	      			});
       			}
       		},
       		mounted() {
-      			axios.get('/cms/post/findAll').then((response) => {
-      				this.data = response.data;
-      			});
+      			this.query();
       		}
     	})
   	</script>

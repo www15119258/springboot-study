@@ -5,6 +5,10 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,7 +77,16 @@ public class PostController {
 	
 	@GetMapping(value = "findAll")
 	public Object findAll() {
-		return postRepository.findAll();
+		Sort sort = Sort.by(Direction.DESC, "publishDate");
+		Pageable pageable = PageRequest.of(0, 10, sort);
+		return postRepository.findAll(pageable);
+	}
+	
+	@GetMapping(value = "findPage/{page}/{size}")
+	public Object findPage(@PathVariable int page, @PathVariable int size) {
+		Sort sort = Sort.by(Direction.DESC, "publishDate");
+		Pageable pageable = PageRequest.of(page, size, sort);
+		return postRepository.findAll(pageable);
 	}
 
 	@GetMapping(value = "add")
