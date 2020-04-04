@@ -1,7 +1,17 @@
 package com.cangzhitao.springboot.study.cms.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -9,10 +19,12 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatcher;
 import org.springframework.data.domain.ExampleMatcher.StringMatcher;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +45,9 @@ public class PostController {
 	
 	@Autowired
 	private PostRepository postRepository;
+	
+	@Autowired
+	private EntityManager entityManager;
 	
 	@PostMapping(value = "save")
 	public Object save(@RequestBody Post post) {
@@ -124,6 +139,96 @@ public class PostController {
 	@GetMapping(value = "edit/{id}")
 	public ModelAndView edit(@PathVariable Long id) {
 		return new ModelAndView("cms/post/edit");
+	}
+	
+	@GetMapping(value = "testQuery1")
+	public Object testQuery1() {
+		String title = "测试";
+		String author = "苍之涛";
+		CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+		CriteriaQuery<Post> criteriaQuery = criteriaBuilder.createQuery(Post.class);
+		Root<Post> root = criteriaQuery.from(Post.class);
+		criteriaQuery.select(root).where(criteriaBuilder.or(criteriaBuilder.like(root.get("title"), title), criteriaBuilder.like(root.get("author"), author)));
+		TypedQuery<Post> typedQuery = this.entityManager.createQuery(criteriaQuery);
+		return typedQuery.getResultList();
+	}
+	
+	@GetMapping(value = "testQuery2")
+	public Object testQuery2() {
+		String title = "测试";
+		String author = "苍之涛";
+		Pageable pageable = PageRequest.of(0, 2);
+		CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+		CriteriaQuery<Post> criteriaQuery = criteriaBuilder.createQuery(Post.class);
+		Root<Post> root = criteriaQuery.from(Post.class);
+		criteriaQuery.select(root).where(criteriaBuilder.or(criteriaBuilder.like(root.get("title"), title), criteriaBuilder.like(root.get("author"), author)));
+		TypedQuery<Post> typedQuery = this.entityManager.createQuery(criteriaQuery);
+		typedQuery.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
+		typedQuery.setMaxResults(pageable.getPageSize());
+		return typedQuery.getResultList();
+	}
+	
+	@GetMapping(value = "testQuery3")
+	public Object testQuery3() {
+		String title = "测试";
+		String author = "苍之涛";
+		Pageable pageable = PageRequest.of(0, 2);
+		CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+		CriteriaQuery<Post> criteriaQuery = criteriaBuilder.createQuery(Post.class);
+		Root<Post> root = criteriaQuery.from(Post.class);
+		
+		Predicate predicate = criteriaBuilder.or(criteriaBuilder.like(root.get("title"), title), criteriaBuilder.like(root.get("author"), author));
+		
+		criteriaQuery.select(root).where(predicate);
+		TypedQuery<Post> typedQuery = this.entityManager.createQuery(criteriaQuery);
+		typedQuery.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
+		typedQuery.setMaxResults(pageable.getPageSize());
+		
+		CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
+		Root<Post> countRoot = countQuery.from(Post.class);
+		countQuery.select(criteriaBuilder.count(countRoot));
+		countQuery.where(predicate);
+		List<Post> list = typedQuery.getResultList();
+		Long count = this.entityManager.createQuery(countQuery).getSingleResult();
+		return new PageImpl<>(list, pageable, count);
+	}
+	
+	@GetMapping(value = "testQuery4")
+	public Object testQuery4() {
+		String title = "测试";
+		String author = "苍之涛";
+		Pageable pageable = PageRequest.of(0, 2, Sort.by(Order.asc("title"), Order.desc("publishDate")));
+		CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+		CriteriaQuery<Post> criteriaQuery = criteriaBuilder.createQuery(Post.class);
+		Root<Post> root = criteriaQuery.from(Post.class);
+		
+		Predicate predicate = criteriaBuilder.or(criteriaBuilder.like(root.get("title"), title), criteriaBuilder.like(root.get("author"), author));
+		
+		criteriaQuery.select(root).where(predicate);
+		
+		List<javax.persistence.criteria.Order> orderList = new ArrayList<>();
+		Iterator<Order> orderIt = pageable.getSort().iterator();
+		while(orderIt.hasNext()) {
+			Order order = orderIt.next();
+			if (order.isAscending()) {
+				orderList.add(criteriaBuilder.asc(root.get(order.getProperty())));
+			} else {
+				orderList.add(criteriaBuilder.desc(root.get(order.getProperty())));
+			}
+		}
+		criteriaQuery.orderBy(orderList);
+		
+		TypedQuery<Post> typedQuery = this.entityManager.createQuery(criteriaQuery);
+		typedQuery.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
+		typedQuery.setMaxResults(pageable.getPageSize());
+		
+		CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
+		Root<Post> countRoot = countQuery.from(Post.class);
+		countQuery.select(criteriaBuilder.count(countRoot));
+		countQuery.where(predicate);
+		List<Post> list = typedQuery.getResultList();
+		Long count = this.entityManager.createQuery(countQuery).getSingleResult();
+		return new PageImpl<>(list, pageable, count);
 	}
 
 }
