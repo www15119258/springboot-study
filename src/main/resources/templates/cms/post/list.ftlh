@@ -7,6 +7,15 @@
 </head>
 <body>
 	<div id="app">
+		<el-form :inline="true" :model="queryForm">
+		  	<el-form-item label="标题">
+		    	<el-input v-model="queryForm.title" placeholder="标题"></el-input>
+		  	</el-form-item>
+		  	<el-form-item label="作者">
+		    	<el-input v-model="queryForm.author" placeholder="作者"></el-input>
+		  	</el-form-item>
+		</el-form>
+		<el-button type="primary" @click="query();">查询</el-button>
 		<el-button type="primary" @click="addPost();">新增文章</el-button>
     	<el-table :data="data">
 	      	<el-table-column prop="title" label="标题">
@@ -41,6 +50,7 @@
   	<!-- import JavaScript -->
   	<script src="/js/index.js"></script>
   	<script src="/js/axios.min.js"></script>
+  	<script src="/js/qs.js"></script>
   	<script>
     	new Vue({
       		el: '#app',
@@ -49,7 +59,11 @@
         			data: [],
         			currentPage: 1,
         			pageSize: 2,
-        			total: 0
+        			total: 0,
+        			queryForm: {
+        				title: '',
+        				author: ''
+        			}
         		}
       		},
       		methods: {
@@ -84,7 +98,7 @@
       				this.query();
       			},
       			query() {
-      				axios.get('/cms/post/findPage/' + (this.currentPage - 1) + '/' + this.pageSize).then((response) => {
+      				axios.post('/cms/post/findPage/' + (this.currentPage - 1) + '/' + this.pageSize, Qs.stringify(this.queryForm)).then((response) => {
 	      				this.data = response.data.content;
 	      				this.total = response.data.totalElements;
 	      			});
