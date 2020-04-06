@@ -1,5 +1,7 @@
 package com.cangzhitao.springboot.study.cms.controller;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -26,6 +28,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +54,9 @@ public class PostController {
 	
 	@Autowired
 	private EntityManager entityManager;
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 	
 	@PostMapping(value = "save")
 	public Object save(@RequestBody Post post) {
@@ -256,5 +264,52 @@ public class PostController {
 		query.setParameter("author", author);
 		return query.getResultList();
 	}
+	
+	@GetMapping(value = "testQuery8")
+	public Object testQuery8() {
+		String title = "测试";
+		String author = "苍之涛";
+		Pageable pageable = PageRequest.of(0, 2, Sort.by(Order.asc("title"), Order.desc("publish_date")));
+		return postRepository.queryByTitleOrAuthorNative(pageable, title, author);
+	}
 
+	@GetMapping(value = "testQuery9")
+	public Object testQuery9() {
+		String title = "测试";
+		String author = "苍之涛";
+		Query query = this.entityManager.createNativeQuery("select p.* from cms_post p where p.title = :title or p.author = :author");
+		query.setParameter("title", title);
+		query.setParameter("author", author);
+		return query.getResultList();
+	}
+	
+	@GetMapping(value = "testQuery10")
+	public Object testQuery10() {
+		String title = "测试";
+		String author = "苍之涛";
+		String sql = "select p.* from cms_post p where p.title = ? or p.author = ?";
+		return this.jdbcTemplate.query(sql, new Object[] { title, author }, new RowMapper<Post>() {
+			@Override
+			public Post mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Post post = new Post();
+				post.setAuthor(rs.getString("author"));
+				post.setContent(rs.getString("content"));
+				post.setId(rs.getLong("id"));
+				post.setPublishDate(rs.getDate("publish_date"));
+				post.setSummary(rs.getString("summary"));
+				post.setTitle(rs.getString("title"));
+				return post;
+			}
+		});
+	}
+	
+	@GetMapping(value = "testQuery11")
+	public Object testQuery11() {
+		String title = "测试";
+		String author = "苍之涛";
+		String sql = "select p.* from cms_post p where p.title = ? or p.author = ?";
+		return this.jdbcTemplate.query(sql, new Object[] { title, author }, new BeanPropertyRowMapper<Post>(Post.class));
+	}
+	
+	
 }

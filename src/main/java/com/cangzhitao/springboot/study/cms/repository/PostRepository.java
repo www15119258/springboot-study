@@ -20,4 +20,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
 	@Query("select p from Post p where p.title = :title or p.author = :author")
 	public Page<Post> queryByTitleOrAuthor(Pageable pageable, String title, String author); 
 	
+	@Query(value = "select p.* from cms_post p where p.title = :title or p.author = :author",
+			countQuery = "select count(1) from cms_post p where p.title = :title or p.author = :author", nativeQuery = true)
+	public Page<Post> queryByTitleOrAuthorNative(Pageable pageable, String title, String author); 
+	
 }
