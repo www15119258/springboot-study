@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -229,6 +230,31 @@ public class PostController {
 		List<Post> list = typedQuery.getResultList();
 		Long count = this.entityManager.createQuery(countQuery).getSingleResult();
 		return new PageImpl<>(list, pageable, count);
+	}
+	
+	@GetMapping(value = "testQuery5")
+	public Object testQuery5() {
+		String title = "测试";
+		String author = "苍之涛";
+		return postRepository.queryByTitleOrAuthor(title, author);
+	}
+	
+	@GetMapping(value = "testQuery6")
+	public Object testQuery6() {
+		String title = "测试";
+		String author = "苍之涛";
+		Pageable pageable = PageRequest.of(0, 2, Sort.by(Order.asc("title"), Order.desc("publishDate")));
+		return postRepository.queryByTitleOrAuthor(pageable, title, author);
+	}
+	
+	@GetMapping(value = "testQuery7")
+	public Object testQuery7() {
+		String title = "测试";
+		String author = "苍之涛";
+		Query query = this.entityManager.createQuery("select p from Post p where p.title = :title or p.author = :author");
+		query.setParameter("title", title);
+		query.setParameter("author", author);
+		return query.getResultList();
 	}
 
 }
