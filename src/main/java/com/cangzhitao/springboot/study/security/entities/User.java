@@ -38,7 +38,7 @@ public class User implements Serializable {
 	
 	@ManyToMany(cascade = { CascadeType.REFRESH }, fetch = FetchType.LAZY)
 	@JoinTable(name = "security_user_role", joinColumns = @JoinColumn(name = "fk_user"), inverseJoinColumns = @JoinColumn(name = "fk_role"))
-	private Set<Role> role;
+	private Set<Role> roles;
 
 	public Long getId() {
 		return id;
@@ -72,12 +72,12 @@ public class User implements Serializable {
 		this.nickname = nickname;
 	}
 
-	public Set<Role> getRole() {
-		return role;
+	public Set<Role> getRoles() {
+		return roles;
 	}
 
-	public void setRole(Set<Role> role) {
-		this.role = role;
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
 	}
 
 }

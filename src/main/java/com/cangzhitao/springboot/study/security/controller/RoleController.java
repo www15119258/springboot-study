@@ -1,6 +1,7 @@
 package com.cangzhitao.springboot.study.security.controller;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -18,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.cangzhitao.springboot.study.security.entities.Perm;
 import com.cangzhitao.springboot.study.security.entities.Role;
+import com.cangzhitao.springboot.study.security.repository.PermRepository;
 import com.cangzhitao.springboot.study.security.repository.RoleRepository;
 
 @RestController
@@ -27,6 +30,9 @@ public class RoleController {
 	
 	@Autowired
 	private RoleRepository roleRepository;
+	
+	@Autowired
+	private PermRepository permRepository;
 	
 	@PostMapping(value = "save")
 	public Object save(@RequestBody Role role) {
@@ -86,6 +92,37 @@ public class RoleController {
 	@GetMapping(value = "edit/{id}")
 	public ModelAndView edit(@PathVariable Long id) {
 		return new ModelAndView("security/role/edit");
+	}
+	
+	@GetMapping(value = "findRoleUnAssignPerms/{roleId}/{page}/{size}")
+	public Object findRoleUnAssignPerms(@PathVariable Long roleId, @PathVariable int page, @PathVariable int size) {
+		Sort sort = Sort.by(Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(page, size, sort);
+		return roleRepository.findRoleUnAssignPerms(roleId, pageable);
+	}
+	
+	@PostMapping(value = "assignPerm")
+	public Object assignPerm(Long roleId, Long permId) {
+		Role role = roleRepository.getOne(roleId);
+		Perm perm = permRepository.getOne(permId);
+		role.getPerms().add(perm);
+		roleRepository.save(role);
+		return perm;
+	}
+	
+	@PostMapping(value = "removePerm")
+	public Object removePerm(Long roleId, Long permId) {
+		Role role = roleRepository.getOne(roleId);
+		Perm perm = permRepository.getOne(permId);
+		Set<Perm> perms = role.getPerms();
+		for (Perm p : perms) {
+			if (p.getId().equals(permId)) {
+				perms.remove(p);
+				break;
+			}
+		}
+		roleRepository.save(role);
+		return perm;
 	}
 	
 }
