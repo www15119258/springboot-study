@@ -49,7 +49,7 @@ public class UserController {
 			return null;
 		}
 		User old = optional.get();
-		//TODO 将user属性赋值给old
+		old.setNickname(user.getNickname());
 		userRepository.save(old);
 		return old;
 	}
@@ -74,6 +74,16 @@ public class UserController {
 		Sort sort = Sort.by(Direction.DESC, "id");
 		Pageable pageable = PageRequest.of(page, size, sort);
 		return userRepository.findAll(pageable);
+	}
+	
+	@GetMapping(value = "add")
+	public ModelAndView add() {
+		return new ModelAndView("security/user/add");
+	}
+	
+	@GetMapping(value = "edit/{id}")
+	public ModelAndView edit(@PathVariable Long id) {
+		return new ModelAndView("security/user/edit");
 	}
 	
 }

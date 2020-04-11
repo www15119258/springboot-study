@@ -49,7 +49,8 @@ public class PermController {
 			return null;
 		}
 		Perm old = optional.get();
-		//TODO 将perm属性赋值给old
+		old.setPerm(perm.getPerm());
+		old.setDescription(perm.getDescription());
 		permRepository.save(old);
 		return old;
 	}
@@ -74,6 +75,16 @@ public class PermController {
 		Sort sort = Sort.by(Direction.DESC, "id");
 		Pageable pageable = PageRequest.of(page, size, sort);
 		return permRepository.findAll(pageable);
+	}
+	
+	@GetMapping(value = "add")
+	public ModelAndView add() {
+		return new ModelAndView("security/perm/add");
+	}
+	
+	@GetMapping(value = "edit/{id}")
+	public ModelAndView edit(@PathVariable Long id) {
+		return new ModelAndView("security/perm/edit");
 	}
 	
 }

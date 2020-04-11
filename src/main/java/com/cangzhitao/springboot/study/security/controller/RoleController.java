@@ -49,7 +49,9 @@ public class RoleController {
 			return null;
 		}
 		Role old = optional.get();
-		//TODO 将role属性赋值给old
+		old.setRolename(role.getRolename());
+		old.setNickname(role.getNickname());
+		old.setDescription(role.getDescription());
 		roleRepository.save(old);
 		return old;
 	}
@@ -74,6 +76,16 @@ public class RoleController {
 		Sort sort = Sort.by(Direction.DESC, "id");
 		Pageable pageable = PageRequest.of(page, size, sort);
 		return roleRepository.findAll(pageable);
+	}
+	
+	@GetMapping(value = "add")
+	public ModelAndView add() {
+		return new ModelAndView("security/role/add");
+	}
+	
+	@GetMapping(value = "edit/{id}")
+	public ModelAndView edit(@PathVariable Long id) {
+		return new ModelAndView("security/role/edit");
 	}
 	
 }
