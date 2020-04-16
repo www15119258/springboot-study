@@ -14,3 +14,7 @@ spring:
         enable_lazy_load_no_trans: true
         id:
           new_generator_mappings: false
+  security:
+    user:
+      name: admin
+      password: 123456

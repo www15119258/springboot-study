@@ -1,6 +1,7 @@
 package com.cangzhitao.springboot.study.security.entities;
 
-import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -14,9 +15,13 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 @Entity
 @Table(name = "security_user")
-public class User implements Serializable {
+public class User implements UserDetails {
 
 	/**
 	 * 
@@ -78,6 +83,40 @@ public class User implements Serializable {
 
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		Set<GrantedAuthority> auths = new HashSet<>();
+		if (roles != null) {
+			roles.forEach(role -> {
+				Set<Perm> perms = role.getPerms();
+				if (perms != null) {
+					perms.forEach(perm -> auths.add(new SimpleGrantedAuthority(perm.getPerm())));
+				}
+			});
+		}
+		return auths;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
 	}
 
 }
