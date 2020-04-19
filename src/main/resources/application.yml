@@ -20,4 +20,4 @@ spring:
       password: 123456
 logging:
   level:
-    root: debug
+    root: info
