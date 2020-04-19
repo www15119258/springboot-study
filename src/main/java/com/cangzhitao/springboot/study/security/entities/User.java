@@ -90,6 +90,7 @@ public class User implements UserDetails {
 		Set<GrantedAuthority> auths = new HashSet<>();
 		if (roles != null) {
 			roles.forEach(role -> {
+				auths.add(new SimpleGrantedAuthority("ROLE_" + role.getRolename()));
 				Set<Perm> perms = role.getPerms();
 				if (perms != null) {
 					perms.forEach(perm -> auths.add(new SimpleGrantedAuthority(perm.getPerm())));

@@ -31,6 +31,7 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,6 +59,7 @@ public class PostController {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	
+	@PreAuthorize("hasAuthority('jbf:cms:post:save')")
 	@PostMapping(value = "save")
 	public Object save(@RequestBody Post post) {
 		post.setPublishDate(new Date());
@@ -65,11 +67,13 @@ public class PostController {
 		return post;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
 	@GetMapping(value = "get/{id}")
 	public Object get(@PathVariable Long id) {
 		return postRepository.findById(id);
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:cms:post:edit')")
 	@PutMapping(value = "update")
 	public Object update(@RequestBody Post post) {
 		if (post.getId() == null) {
@@ -89,6 +93,7 @@ public class PostController {
 		return old;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:cms:post:delete')")
 	@DeleteMapping(value = "delete/{id}")
 	public Object delete(@PathVariable Long id) {
 		try {
@@ -99,11 +104,13 @@ public class PostController {
 		return true;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
 	@GetMapping(value = "list")
 	public ModelAndView list() {
 		return new ModelAndView("cms/post/list");
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
 	@GetMapping(value = "findAll")
 	public Object findAll() {
 		Sort sort = Sort.by(Direction.DESC, "publishDate");
@@ -111,6 +118,7 @@ public class PostController {
 		return postRepository.findAll(pageable);
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
 	@GetMapping(value = "findPage/{page}/{size}")
 	public Object findPage(@PathVariable int page, @PathVariable int size) {
 		Sort sort = Sort.by(Direction.DESC, "publishDate");
@@ -118,6 +126,7 @@ public class PostController {
 		return postRepository.findAll(pageable);
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
 	@PostMapping(value = "findPage/{page}/{size}")
 	public Object findPage(@PathVariable int page, @PathVariable int size, 
 			@RequestParam(required = false) String author,
@@ -140,11 +149,13 @@ public class PostController {
 		return postRepository.findAll(example, pageable);
 	}
 
+	@PreAuthorize("hasAuthority('jbf:cms:post:save')")
 	@GetMapping(value = "add")
 	public ModelAndView add() {
 		return new ModelAndView("cms/post/add");
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:cms:post:edit')")
 	@GetMapping(value = "edit/{id}")
 	public ModelAndView edit(@PathVariable Long id) {
 		return new ModelAndView("cms/post/edit");

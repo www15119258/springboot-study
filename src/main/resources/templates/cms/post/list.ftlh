@@ -16,7 +16,7 @@
 		  	</el-form-item>
 		</el-form>
 		<el-button type="primary" @click="query();">查询</el-button>
-		<el-button type="primary" @click="addPost();">新增文章</el-button>
+		<el-button type="primary" @click="addPost();" v-if="showAddBtn">新增文章</el-button>
     	<el-table :data="data">
 	      	<el-table-column prop="title" label="标题">
 	      	</el-table-column>
@@ -26,9 +26,9 @@
 	      	</el-table-column>
 	      	<el-table-column label="操作" width="100">
 		      	<template slot-scope="scope">
-		        	<el-button type="text" size="small" 
+		        	<el-button type="text" size="small" v-if="showEditBtn"
 		        		@click="edit(scope.row)">编辑</el-button>
-	        		<el-button type="text" size="small" 
+	        		<el-button type="text" size="small" v-if="showDeleteBtn"
 		        		@click="deleteRow(scope.row)">删除</el-button>
 		      	</template>
 		    </el-table-column>
@@ -38,7 +38,7 @@
   				@size-change="handleSizeChange"
   				@current-change="handleCurrentChange"
   				:current-page="currentPage"
-  				:page-sizes="[1, 2, 4]"
+  				:page-sizes="[10, 20, 50]"
   				:page-size="pageSize"
   				layout="total, sizes, prev, pager, next, jumper"
   				:total="total">
@@ -51,6 +51,7 @@
   	<script src="/js/index.js"></script>
   	<script src="/js/axios.min.js"></script>
   	<script src="/js/qs.js"></script>
+  	<script src="/js/api.js"></script>
   	<script>
     	new Vue({
       		el: '#app',
@@ -58,12 +59,15 @@
         		return { 
         			data: [],
         			currentPage: 1,
-        			pageSize: 2,
+        			pageSize: 10,
         			total: 0,
         			queryForm: {
         				title: '',
         				author: ''
-        			}
+        			},
+        			showAddBtn: false,
+        			showEditBtn: false,
+        			showDeleteBtn: false
         		}
       		},
       		methods: {
@@ -106,6 +110,9 @@
       		},
       		mounted() {
       			this.query();
+      			this.$hasPerm('jbf:cms:post:save').then((result) => { this.showAddBtn =  result.data });
+      			this.$hasPerm('jbf:cms:post:edit').then((result) => { this.showEditBtn =  result.data });
+      			this.$hasPerm('jbf:cms:post:delete').then((result) => { this.showDeleteBtn =  result.data });
       		}
     	})
   	</script>

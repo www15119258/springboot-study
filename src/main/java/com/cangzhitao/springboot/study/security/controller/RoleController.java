@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,17 +35,20 @@ public class RoleController {
 	@Autowired
 	private PermRepository permRepository;
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:save')")
 	@PostMapping(value = "save")
 	public Object save(@RequestBody Role role) {
 		roleRepository.save(role);
 		return role;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:list')")
 	@GetMapping(value = "get/{id}")
 	public Object get(@PathVariable Long id) {
 		return roleRepository.findById(id);
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:edit')")
 	@PutMapping(value = "update")
 	public Object update(@RequestBody Role role) {
 		if (role.getId() == null) {
@@ -62,6 +66,7 @@ public class RoleController {
 		return old;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:delete')")
 	@DeleteMapping(value = "delete/{id}")
 	public Object delete(@PathVariable Long id) {
 		try {
@@ -72,11 +77,13 @@ public class RoleController {
 		return true;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:list')")
 	@GetMapping(value = "list")
 	public ModelAndView list() {
 		return new ModelAndView("security/role/list");
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:list')")
 	@GetMapping(value = "findPage/{page}/{size}")
 	public Object findPage(@PathVariable int page, @PathVariable int size) {
 		Sort sort = Sort.by(Direction.DESC, "id");
@@ -84,16 +91,19 @@ public class RoleController {
 		return roleRepository.findAll(pageable);
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:save')")
 	@GetMapping(value = "add")
 	public ModelAndView add() {
 		return new ModelAndView("security/role/add");
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:edit')")
 	@GetMapping(value = "edit/{id}")
 	public ModelAndView edit(@PathVariable Long id) {
 		return new ModelAndView("security/role/edit");
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:assignPerm')")
 	@GetMapping(value = "findRoleUnAssignPerms/{roleId}/{page}/{size}")
 	public Object findRoleUnAssignPerms(@PathVariable Long roleId, @PathVariable int page, @PathVariable int size) {
 		Sort sort = Sort.by(Direction.DESC, "id");
@@ -101,6 +111,7 @@ public class RoleController {
 		return roleRepository.findRoleUnAssignPerms(roleId, pageable);
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:assignPerm')")
 	@PostMapping(value = "assignPerm")
 	public Object assignPerm(Long roleId, Long permId) {
 		Role role = roleRepository.getOne(roleId);
@@ -110,6 +121,7 @@ public class RoleController {
 		return perm;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:assignPerm')")
 	@PostMapping(value = "removePerm")
 	public Object removePerm(Long roleId, Long permId) {
 		Role role = roleRepository.getOne(roleId);

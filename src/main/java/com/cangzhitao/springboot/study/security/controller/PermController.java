@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,17 +29,20 @@ public class PermController {
 	@Autowired
 	private PermRepository permRepository;
 	
+	@PreAuthorize("hasAuthority('jbf:security:perm:save')")
 	@PostMapping(value = "save")
 	public Object save(@RequestBody Perm perm) {
 		permRepository.save(perm);
 		return perm;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:perm:list')")
 	@GetMapping(value = "get/{id}")
 	public Object get(@PathVariable Long id) {
 		return permRepository.findById(id);
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:perm:edit')")
 	@PutMapping(value = "update")
 	public Object update(@RequestBody Perm perm) {
 		if (perm.getId() == null) {
@@ -55,6 +59,7 @@ public class PermController {
 		return old;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:perm:delete')")
 	@DeleteMapping(value = "delete/{id}")
 	public Object delete(@PathVariable Long id) {
 		try {
@@ -65,11 +70,13 @@ public class PermController {
 		return true;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:perm:list')")
 	@GetMapping(value = "list")
 	public ModelAndView list() {
 		return new ModelAndView("security/perm/list");
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:perm:list')")
 	@GetMapping(value = "findPage/{page}/{size}")
 	public Object findPage(@PathVariable int page, @PathVariable int size) {
 		Sort sort = Sort.by(Direction.DESC, "id");
@@ -77,11 +84,13 @@ public class PermController {
 		return permRepository.findAll(pageable);
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:perm:save')")
 	@GetMapping(value = "add")
 	public ModelAndView add() {
 		return new ModelAndView("security/perm/add");
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:perm:edit')")
 	@GetMapping(value = "edit/{id}")
 	public ModelAndView edit(@PathVariable Long id) {
 		return new ModelAndView("security/perm/edit");
