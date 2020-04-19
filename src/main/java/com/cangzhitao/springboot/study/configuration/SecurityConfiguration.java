@@ -15,6 +15,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().anyRequest().permitAll();
 		http.formLogin().defaultSuccessUrl("/security/user/list");
 		http.csrf().disable();
+		http.headers().frameOptions().sameOrigin();
 	}
 	
 	@Bean

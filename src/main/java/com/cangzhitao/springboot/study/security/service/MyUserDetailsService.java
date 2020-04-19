@@ -24,6 +24,7 @@ public class MyUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		User user = new User();
+		user.setUsername(username);
 		ExampleMatcher exampleMatcher = ExampleMatcher.matching().withMatcher("username", 
 				GenericPropertyMatcher.of(StringMatcher.EXACT, false));
 		Example<User> example = Example.of(user, exampleMatcher);
