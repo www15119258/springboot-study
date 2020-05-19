@@ -8,8 +8,9 @@
 <body>
 	<div id="app">
 		<el-button type="primary" @click="query();">刷新</el-button>
-		<el-button type="primary" @click="edit();" v-if="showAddBtn">编辑菜单</el-button>
-		<el-button type="primary" @click="deleteRow();" v-if="showAddBtn">删除菜单</el-button>
+		<el-button type="primary" @click="add();" v-if="showAddBtn">新增菜单</el-button>
+		<el-button type="primary" @click="edit();" v-if="showEditBtn">编辑菜单</el-button>
+		<el-button type="primary" @click="deleteRow();" v-if="showDeleteBtn">删除菜单</el-button>
     	<el-tree ref="tree" node-key="id" :expand-on-click-node="false" :data="data" :props="defaultProps"></el-tree>
   	</div>
 </body>
