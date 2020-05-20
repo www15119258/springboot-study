@@ -16,10 +16,12 @@
 	      	</el-table-column>
 	      	<el-table-column prop="description" label="描述">
 	      	</el-table-column>
-	      	<el-table-column label="操作" width="200">
+	      	<el-table-column label="操作" width="250">
 		      	<template slot-scope="scope">
 		      		<el-button type="text" size="small" v-if="showAssignPermBtn"
 		        		@click="assignPerms(scope.row)">分配权限</el-button>
+		        	<el-button type="text" size="small" v-if="showAssignMenuBtn"
+		        		@click="assignMenus(scope.row)">分配菜单</el-button>
 		        	<el-button type="text" size="small" v-if="showEditBtn" 
 		        		@click="edit(scope.row)">编辑</el-button>
 	        		<el-button type="text" size="small" v-if="showDeleteBtn" 
@@ -89,6 +91,13 @@
 		    	<el-button type="primary" @click="notHasPermDialogVisible = false">关闭</el-button>
 		  	</span>
 		</el-dialog>
+		<el-dialog title="菜单列表" :visible.sync="menusDialogVisible" :show-close="false" @opened="menusDialogOpened">
+	  		<el-tree ref="tree" node-key="id" :data="menus" :props="defaultProps" check-strictly show-checkbox></el-tree>
+	  		<span slot="footer" class="dialog-footer">
+			    <el-button @click="menusDialogVisible = false">取 消</el-button>
+			    <el-button type="primary" @click="updateMenus">更 新</el-button>
+		  	</span>
+		</el-dialog>
   	</div>
 </body>
   	<script src="/js/vue.js"></script>
@@ -117,7 +126,14 @@
         			showAddBtn: false,
         			showAssignPermBtn: false,
         			showEditBtn: false,
-        			showDeleteBtn: false
+        			showDeleteBtn: false,
+        			showAssignMenuBtn: false,
+        			menusDialogVisible: false,
+        			menus: [],
+        			defaultProps: {
+        				children: 'children',
+          				label: 'name'
+        			}
         		}
       		},
       		methods: {
@@ -162,6 +178,26 @@
       				this.hasPermData = row.perms;
       				this.hasPermDialogVisible = true;
       			},
+      			assignMenus(row) {
+      				this.currentRole = row;
+      				this.menusDialogVisible = true;
+      			},
+      			updateMenus() {
+      				let data = new Object();
+      				data.roleId = this.currentRole.id;
+      				data.menuIds = this.$refs['tree'].getCheckedKeys();
+      				axios.post('/security/role/updateMenus', Qs.stringify(data, { arrayFormat: 'repeat' })).then((response) => {
+      					this.query();
+	      				this.menusDialogVisible = false;
+	      			});
+      			},
+      			menusDialogOpened() {
+      				this.menus = [];
+      				axios.get('/security/menu/getTree').then((response) => {
+	      				this.menus = response.data;
+	      				this.$refs['tree'].setCheckedKeys(this.currentRole.menus.map((m) => m.id));
+	      			});
+      			},
       			showAddPermPage() {
       				this.notHasPermCurrentPage = 1;
       				this.notHasPermPageSize = 10;
@@ -205,6 +241,7 @@
       			this.query();
       			this.$hasPerm('jbf:security:role:save').then((result) => { this.showAddBtn =  result.data });
       			this.$hasPerm('jbf:security:role:assignPerm').then((result) => { this.showAssignPermBtn =  result.data });
+      			this.$hasPerm('jbf:security:role:assignMenu').then((result) => { this.showAssignMenuBtn =  result.data });
       			this.$hasPerm('jbf:security:role:edit').then((result) => { this.showEditBtn =  result.data });
       			this.$hasPerm('jbf:security:role:delete').then((result) => { this.showDeleteBtn =  result.data });
       		}

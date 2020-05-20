@@ -48,6 +48,10 @@ public class Role implements Serializable {
 	@ManyToMany(cascade = { CascadeType.REFRESH }, fetch = FetchType.LAZY)
 	@JoinTable(name = "security_role_perm", joinColumns = @JoinColumn(name = "fk_role"), inverseJoinColumns = @JoinColumn(name = "fk_perm"))
 	private Set<Perm> perms;
+	
+	@ManyToMany(cascade = { CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@JoinTable(name = "security_role_menu", joinColumns = @JoinColumn(name = "fk_role"), inverseJoinColumns = @JoinColumn(name = "fk_menu"))
+	private Set<Menu> menus;
 
 	public Long getId() {
 		return id;
@@ -87,6 +91,14 @@ public class Role implements Serializable {
 
 	public void setPerms(Set<Perm> perms) {
 		this.perms = perms;
+	}
+
+	public Set<Menu> getMenus() {
+		return menus;
+	}
+
+	public void setMenus(Set<Menu> menus) {
+		this.menus = menus;
 	}
 	
 }

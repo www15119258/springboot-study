@@ -1,5 +1,6 @@
 package com.cangzhitao.springboot.study.security.controller;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.cangzhitao.springboot.study.security.entities.Menu;
 import com.cangzhitao.springboot.study.security.entities.Perm;
 import com.cangzhitao.springboot.study.security.entities.Role;
 import com.cangzhitao.springboot.study.security.repository.PermRepository;
@@ -137,4 +139,22 @@ public class RoleController {
 		return perm;
 	}
 	
+	@PreAuthorize("hasAuthority('jbf:security:role:assignMenu')")
+	@PostMapping(value = "updateMenus")
+	public Object updateMenus(Long roleId, Long[] menuIds) {
+		Role role = roleRepository.getOne(roleId);
+		if (menuIds == null || menuIds.length == 0) {
+			role.setMenus(null);
+		} else {
+			Set<Menu> menus = new HashSet<>();
+			for (int i = 0; i < menuIds.length; i++) {
+				Menu m = new Menu();
+				m.setId(menuIds[i]);
+				menus.add(m);
+			}
+			role.setMenus(menus);
+		}
+		roleRepository.save(role);
+		return role;
+	}
 }
