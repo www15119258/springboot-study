@@ -24,8 +24,10 @@
 	      	</el-table-column>
 	      	<el-table-column prop="author" label="作者">
 	      	</el-table-column>
-	      	<el-table-column label="操作" width="100">
+	      	<el-table-column label="操作" width="200">
 		      	<template slot-scope="scope">
+		      		<el-button type="text" size="small" v-if="showAssignCategoryBtn"
+		        		@click="assignCategorys(scope.row)">分配文章分类</el-button>
 		        	<el-button type="text" size="small" v-if="showEditBtn"
 		        		@click="edit(scope.row)">编辑</el-button>
 	        		<el-button type="text" size="small" v-if="showDeleteBtn"
@@ -44,6 +46,13 @@
   				:total="total">
 	    	</el-pagination>
 	  	</div>
+	  	<el-dialog title="文章分类列表" :visible.sync="categorysDialogVisible" :show-close="false" @opened="categorysDialogOpened">
+	  		<el-tree ref="tree" node-key="id" :data="categorys" :props="defaultProps" check-strictly show-checkbox></el-tree>
+	  		<span slot="footer" class="dialog-footer">
+			    <el-button @click="categorysDialogVisible = false">取 消</el-button>
+			    <el-button type="primary" @click="updateCategorys">更 新</el-button>
+		  	</span>
+		</el-dialog>
   	</div>
 </body>
   	<script src="/js/vue.js"></script>
@@ -65,11 +74,24 @@
         				title: '',
         				author: ''
         			},
+        			currentData: {},
         			showAddBtn: false,
         			showEditBtn: false,
-        			showDeleteBtn: false
+        			showDeleteBtn: false,
+        			//showAssignCategoryBtn: false,
+        			categorysDialogVisible: false,
+        			categorys: [],
+        			defaultProps: {
+        				children: 'children',
+          				label: 'name'
+        			}
         		}
       		},
+      		computed: {
+			   	showAssignCategoryBtn () {
+			     	return this.showAddBtn || this.showEditBtn;
+			   	}
+			},
       		methods: {
       			addPost() {
       				window.location = '/cms/post/add';
@@ -105,6 +127,26 @@
       				axios.post('/cms/post/findPage/' + (this.currentPage - 1) + '/' + this.pageSize, Qs.stringify(this.queryForm)).then((response) => {
 	      				this.data = response.data.content;
 	      				this.total = response.data.totalElements;
+	      			});
+      			},
+      			assignCategorys(row) {
+      				this.currentData = row;
+      				this.categorysDialogVisible = true;
+      			},
+      			categorysDialogOpened() {
+      				this.categorys = [];
+      				axios.get('/cms/category/getTree').then((response) => {
+	      				this.categorys = response.data;
+	      				this.$refs['tree'].setCheckedKeys(this.currentData.categorys.map((m) => m.id));
+	      			});
+      			},
+      			updateCategorys() {
+      				let data = new Object();
+      				data.postId = this.currentData.id;
+      				data.categoryIds = this.$refs['tree'].getCheckedKeys();
+      				axios.post('/cms/post/updateCategorys', Qs.stringify(data, { arrayFormat: 'repeat' })).then((response) => {
+      					this.query();
+	      				this.categorysDialogVisible = false;
 	      			});
       			}
       		},

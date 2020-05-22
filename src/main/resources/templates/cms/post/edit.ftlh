@@ -20,6 +20,9 @@
 			  <el-form-item label="作者">
 			    	<el-input v-model="form.author"></el-input>
 			  </el-form-item>
+			  <el-form-item label="文章分类">
+			  		<el-tree ref="tree" node-key="id" :data="categorys" :props="defaultProps" check-strictly show-checkbox></el-tree>
+			  </el-form-item>
 			  <el-form-item>
 			    	<el-button type="primary" @click="updatePost();">提交</el-button>
 			    	<el-button @click="goback();">返回</el-button>
@@ -41,6 +44,11 @@
         				content: '',
         				summary: '',
         				author: ''
+        			},
+        			categorys: [],
+        			defaultProps: {
+        				children: 'children',
+          				label: 'name'
         			}
         		}
       		},
@@ -49,6 +57,12 @@
       				window.location = '/cms/post/list';
       			},
       			updatePost() {
+      				let categoryIds = this.$refs['tree'].getCheckedKeys();
+      				if (categoryIds.length > 0) {
+      					this.form.categorys = categoryIds.map((id) => { return { id }; });
+      				} else {
+      					this.form.categorys = [];
+      				}
       				axios.put('/cms/post/update', this.form).then((response) => {
       					this.goback();
 	      			});
@@ -59,7 +73,12 @@
       			let id = paths[paths.length - 1];
       			axios.get('/cms/post/get/' + id).then((response) => {
       				this.form = response.data;
+      				axios.get('/cms/category/getTree').then((response) => {
+	      				this.categorys = response.data;
+	      				this.$refs['tree'].setCheckedKeys(this.form.categorys.map((m) => m.id))
+	      			});
       			});
+      			
       		}
     	})
   	</script>

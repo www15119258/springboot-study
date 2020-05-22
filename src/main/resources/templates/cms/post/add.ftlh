@@ -9,7 +9,7 @@
 	<div id="app">
 		<el-form label-position="right" label-width="80px" :model="form">
 			  <el-form-item label="标题">
-			    	<el-input v-model="form.title"></el-input>
+		    		<el-input v-model="form.title"></el-input>
 			  </el-form-item>
 			  <el-form-item label="内容">
 			    	<el-input type="textarea" v-model="form.content"></el-input>
@@ -19,6 +19,9 @@
 			  </el-form-item>
 			  <el-form-item label="作者">
 			    	<el-input v-model="form.author"></el-input>
+			  </el-form-item>
+			  <el-form-item label="文章分类">
+			  		<el-tree ref="tree" node-key="id" :data="categorys" :props="defaultProps" check-strictly show-checkbox></el-tree>
 			  </el-form-item>
 			  <el-form-item>
 			    	<el-button type="primary" @click="addPost();">提交</el-button>
@@ -41,6 +44,11 @@
         				content: '',
         				summary: '',
         				author: ''
+        			},
+        			categorys: [],
+        			defaultProps: {
+        				children: 'children',
+          				label: 'name'
         			}
         		}
       		},
@@ -49,12 +57,19 @@
       				window.location = '/cms/post/list';
       			},
       			addPost() {
+      				let categoryIds = this.$refs['tree'].getCheckedKeys();
+      				if (categoryIds.length > 0) {
+      					this.form.categorys = categoryIds.map((id) => { return { id }; });
+      				}
       				axios.post('/cms/post/save', this.form).then((response) => {
       					this.goback();
 	      			});
       			}
       		},
       		mounted() {
+      			axios.get('/cms/category/getTree').then((response) => {
+      				this.categorys = response.data;
+      			});
       		}
     	})
   	</script>

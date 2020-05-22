@@ -3,16 +3,13 @@
 <head>
     <meta charset="utf‐8">
     <link rel="stylesheet" href="/css/index.css">
-    <title>菜单编辑页面</title>
+    <title>文章列表编辑页面</title>
 </head>
 <body>
 	<div id="app">
 		<el-form label-position="right" label-width="80px" :model="form">
 			  <el-form-item label="名称">
 			    	<el-input v-model="form.name"></el-input>
-			  </el-form-item>
-			  <el-form-item label="URL">
-			    	<el-input v-model="form.url"></el-input>
 			  </el-form-item>
 			  <el-form-item label="父">
 			    	<el-input v-model="form.parent.name" readonly></el-input>
@@ -35,7 +32,6 @@
         		return { 
         			form: {
         				name: '',
-        				url: '',
         				parent: {
         					id: '',
         					name: ''
@@ -45,10 +41,10 @@
       		},
       		methods: {
       			goback() {
-      				window.location = '/security/menu/list';
+      				window.location = '/cms/category/list';
       			},
       			update() {
-      				axios.put('/security/menu/update', this.form).then((response) => {
+      				axios.put('/cms/category/update', this.form).then((response) => {
       					this.goback();
 	      			});
       			}
@@ -56,7 +52,7 @@
       		mounted() {
       			let paths = document.location.href.split('/');
       			let id = paths[paths.length - 1];
-      			axios.get('/security/menu/get/' + id).then((response) => {
+      			axios.get('/cms/category/get/' + id).then((response) => {
       				if (!response.data.parent) {
       					response.data.parent = {
       						id: '',
