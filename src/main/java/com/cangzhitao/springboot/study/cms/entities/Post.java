@@ -1,10 +1,16 @@
 package com.cangzhitao.springboot.study.cms.entities;
 
 import java.util.Date;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import com.alibaba.fastjson.annotation.JSONField;
@@ -48,6 +54,10 @@ public class Post extends BaseEntity {
 	@Column(name = "publish_date")
 	private Date publishDate;
 	
+	@ManyToMany(cascade = { CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@JoinTable(name = "cms_post_category", joinColumns = @JoinColumn(name = "fk_post"), inverseJoinColumns = @JoinColumn(name = "fk_category"))
+	private Set<Category> categorys;
+	
 	public String getTitle() {
 		return title;
 	}
@@ -86,6 +96,14 @@ public class Post extends BaseEntity {
 
 	public void setPublishDate(Date publishDate) {
 		this.publishDate = publishDate;
+	}
+
+	public Set<Category> getCategorys() {
+		return categorys;
+	}
+
+	public void setCategorys(Set<Category> categorys) {
+		this.categorys = categorys;
 	}
 	
 }

@@ -1,100 +1,89 @@
 package com.cangzhitao.springboot.study.cms.controller;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
+import com.cangzhitao.springboot.study.base.controller.BaseEntityController;
+import com.cangzhitao.springboot.study.cms.entities.Category;
 import com.cangzhitao.springboot.study.cms.entities.Post;
 import com.cangzhitao.springboot.study.cms.service.IPostService;
 
 @RestController
 @RequestMapping(value = "cms/post")
-public class PostController {
+public class PostController extends BaseEntityController<Post> {
 	
 	@Autowired
 	private IPostService service;
 	
-	@PreAuthorize("hasAuthority('jbf:cms:post:save')")
-	@PostMapping(value = "save")
-	public Object save(@RequestBody Post post) {
-		post.setPublishDate(new Date());
-		service.save(post);
-		return post;
+	@Override
+	public IPostService getService() {
+		return service;
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
-	@GetMapping(value = "get/{id}")
-	public Object get(@PathVariable Long id) {
-		return service.get(id);
+	@Override
+	public String getPageList() {
+		return "cms/post/list";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:cms:post:edit')")
-	@PutMapping(value = "update")
-	public Object update(@RequestBody Post post) {
-		if (post.getId() == null) {
-			return null;
-		}
-		Post old = service.get(post.getId());
-		if (old == null) {
-			return null;
-		}
-		old.setTitle(post.getTitle());
-		old.setContent(post.getContent());
-		old.setSummary(post.getSummary());
-		old.setAuthor(post.getAuthor());
-		old.setPublishDate(post.getPublishDate());
-		service.save(old);
-		return old;
+	@Override
+	public String getPageAdd() {
+		return "cms/post/add";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:cms:post:delete')")
-	@DeleteMapping(value = "delete/{id}")
-	public Object delete(@PathVariable Long id) {
-		try {
-			service.deleteById(id);
-		} catch (EmptyResultDataAccessException e) {
-			return false;
-		}
-		return true;
+	@Override
+	public String getPageEdit() {
+		return "cms/post/edit";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
-	@GetMapping(value = "list")
-	public ModelAndView list() {
-		return new ModelAndView("cms/post/list");
+	@Override
+	public String getViewPerm() {
+		return "jbf:cms:post:list";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
-	@GetMapping(value = "findAll")
-	public Object findAll() {
-		Sort sort = Sort.by(Direction.DESC, "publishDate");
-		Pageable pageable = PageRequest.of(0, 10, sort);
-		return service.findAll(pageable);
+	@Override
+	public String getSavePerm() {
+		return "jbf:cms:post:save";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
-	@GetMapping(value = "findPage/{page}/{size}")
-	public Object findPage(@PathVariable int page, @PathVariable int size) {
-		Sort sort = Sort.by(Direction.DESC, "publishDate");
-		Pageable pageable = PageRequest.of(page, size, sort);
-		return service.findAll(pageable);
+	@Override
+	public String getEditPerm() {
+		return "jbf:cms:post:edit";
 	}
+	
+	@Override
+	public String getDeletePerm() {
+		return "jbf:cms:post:delete";
+	}
+	
+	@Override
+	public void updateOld(Post old, Post entity) {
+		old.setTitle(entity.getTitle());
+		old.setContent(entity.getContent());
+		old.setSummary(entity.getSummary());
+		old.setAuthor(entity.getAuthor());
+		old.setPublishDate(entity.getPublishDate());
+		old.setCategorys(entity.getCategorys());
+	}
+	
+	@Override
+	public void beforeSave(Post entity) {
+		super.beforeSave(entity);
+		entity.setPublishDate(new Date());
+	}
+	
 	
 	@PreAuthorize("hasAuthority('jbf:cms:post:list')")
 	@PostMapping(value = "findPage/{page}/{size}")
@@ -106,16 +95,23 @@ public class PostController {
 		return service.findByAuthorAndTitle(author, title, pageable);
 	}
 
-	@PreAuthorize("hasAuthority('jbf:cms:post:save')")
-	@GetMapping(value = "add")
-	public ModelAndView add() {
-		return new ModelAndView("cms/post/add");
-	}
-	
-	@PreAuthorize("hasAuthority('jbf:cms:post:edit')")
-	@GetMapping(value = "edit/{id}")
-	public ModelAndView edit(@PathVariable Long id) {
-		return new ModelAndView("cms/post/edit");
+	@PreAuthorize("hasAnyAuthority('jbf:cms:post:save', 'jbf:cms:post:edit')")
+	@PostMapping(value = "updateCategorys")
+	public Object updateCategorys(Long postId, Long[] categoryIds) {
+		Post post = service.get(postId);
+		if (categoryIds == null || categoryIds.length == 0) {
+			post.setCategorys(null);
+		} else {
+			Set<Category> categorys = new HashSet<>();
+			for (int i = 0; i < categoryIds.length; i++) {
+				Category c = new Category();
+				c.setId(categoryIds[i]);
+				categorys.add(c);
+			}
+			post.setCategorys(categorys);
+		}
+		service.save(post);
+		return post;
 	}
 
 }
