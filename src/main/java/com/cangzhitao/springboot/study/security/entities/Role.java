@@ -1,34 +1,25 @@
 package com.cangzhitao.springboot.study.security.entities;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.cangzhitao.springboot.study.base.entities.BaseEntity;
+
 @Entity
 @Table(name = "security_role")
-public class Role implements Serializable {
+public class Role extends BaseEntity {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3556393258280284642L;
-
-	/**
-	 * 主键
-	 */
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
 
 	/**
 	 * 角色名称（英文）
@@ -52,14 +43,6 @@ public class Role implements Serializable {
 	@ManyToMany(cascade = { CascadeType.REFRESH }, fetch = FetchType.LAZY)
 	@JoinTable(name = "security_role_menu", joinColumns = @JoinColumn(name = "fk_role"), inverseJoinColumns = @JoinColumn(name = "fk_menu"))
 	private Set<Menu> menus;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getRolename() {
 		return rolename;

@@ -1,28 +1,18 @@
 package com.cangzhitao.springboot.study.security.entities;
 
-import java.io.Serializable;
-
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.cangzhitao.springboot.study.base.entities.BaseEntity;
 
 @Entity
 @Table(name = "security_perm")
-public class Perm implements Serializable {
+public class Perm extends BaseEntity {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 9008630084169012524L;
-	
-	/**
-	 * 主键
-	 */
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
 	
 	/**
 	 * 名称
@@ -38,14 +28,6 @@ public class Perm implements Serializable {
 	 * 描述
 	 */
 	private String description;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getName() {
 		return name;

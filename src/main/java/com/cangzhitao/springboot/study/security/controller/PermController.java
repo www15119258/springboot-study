@@ -1,99 +1,64 @@
 package com.cangzhitao.springboot.study.security.controller;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
+import com.cangzhitao.springboot.study.base.controller.BaseEntityController;
 import com.cangzhitao.springboot.study.security.entities.Perm;
-import com.cangzhitao.springboot.study.security.repository.PermRepository;
+import com.cangzhitao.springboot.study.security.service.IPermService;
 
 @RestController
 @RequestMapping(value = "security/perm")
-public class PermController {
+public class PermController extends BaseEntityController<Perm> {
 	
 	@Autowired
-	private PermRepository permRepository;
+	private IPermService service;
 	
-	@PreAuthorize("hasAuthority('jbf:security:perm:save')")
-	@PostMapping(value = "save")
-	public Object save(@RequestBody Perm perm) {
-		permRepository.save(perm);
-		return perm;
+	@Override
+	public IPermService getService() {
+		return service;
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:perm:list')")
-	@GetMapping(value = "get/{id}")
-	public Object get(@PathVariable Long id) {
-		return permRepository.findById(id);
+	@Override
+	public String getPageList() {
+		return "security/perm/list";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:perm:edit')")
-	@PutMapping(value = "update")
-	public Object update(@RequestBody Perm perm) {
-		if (perm.getId() == null) {
-			return null;
-		}
-		Optional<Perm> optional = permRepository.findById(perm.getId());
-		if (!optional.isPresent()) {
-			return null;
-		}
-		Perm old = optional.get();
-		old.setPerm(perm.getPerm());
-		old.setDescription(perm.getDescription());
-		permRepository.save(old);
-		return old;
+	@Override
+	public String getPageAdd() {
+		return "security/perm/add";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:perm:delete')")
-	@DeleteMapping(value = "delete/{id}")
-	public Object delete(@PathVariable Long id) {
-		try {
-			permRepository.deleteById(id);
-		} catch (EmptyResultDataAccessException e) {
-			return false;
-		}
-		return true;
+	@Override
+	public String getPageEdit() {
+		return "security/perm/edit";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:perm:list')")
-	@GetMapping(value = "list")
-	public ModelAndView list() {
-		return new ModelAndView("security/perm/list");
+	@Override
+	public String getViewPerm() {
+		return "jbf:security:perm:list";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:perm:list')")
-	@GetMapping(value = "findPage/{page}/{size}")
-	public Object findPage(@PathVariable int page, @PathVariable int size) {
-		Sort sort = Sort.by(Direction.DESC, "id");
-		Pageable pageable = PageRequest.of(page, size, sort);
-		return permRepository.findAll(pageable);
+	@Override
+	public String getSavePerm() {
+		return "jbf:security:perm:save";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:perm:save')")
-	@GetMapping(value = "add")
-	public ModelAndView add() {
-		return new ModelAndView("security/perm/add");
+	@Override
+	public String getEditPerm() {
+		return "jbf:security:perm:edit";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:perm:edit')")
-	@GetMapping(value = "edit/{id}")
-	public ModelAndView edit(@PathVariable Long id) {
-		return new ModelAndView("security/perm/edit");
+	@Override
+	public String getDeletePerm() {
+		return "jbf:security:perm:delete";
+	}
+	
+	@Override
+	public void updateOld(Perm old, Perm entity) {
+		old.setPerm(entity.getPerm());
+		old.setDescription(entity.getDescription());
 	}
 	
 }

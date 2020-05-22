@@ -1,33 +1,23 @@
 package com.cangzhitao.springboot.study.cms.entities;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.cangzhitao.springboot.study.base.entities.BaseEntity;
 
 @Entity
 @Table(name = "cms_post")
-public class Post implements Serializable {
+public class Post extends BaseEntity {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1378460234126727999L;
-	
-	/**
-	 * 主键
-	 */
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
 	
 	/**
 	 * 标题
@@ -58,14 +48,6 @@ public class Post implements Serializable {
 	@Column(name = "publish_date")
 	private Date publishDate;
 	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getTitle() {
 		return title;
 	}

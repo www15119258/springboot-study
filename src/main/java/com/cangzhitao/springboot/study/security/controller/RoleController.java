@@ -1,133 +1,108 @@
 package com.cangzhitao.springboot.study.security.controller;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
+import com.cangzhitao.springboot.study.base.controller.BaseEntityController;
 import com.cangzhitao.springboot.study.security.entities.Menu;
 import com.cangzhitao.springboot.study.security.entities.Perm;
 import com.cangzhitao.springboot.study.security.entities.Role;
-import com.cangzhitao.springboot.study.security.repository.PermRepository;
-import com.cangzhitao.springboot.study.security.repository.RoleRepository;
+import com.cangzhitao.springboot.study.security.service.IPermService;
+import com.cangzhitao.springboot.study.security.service.IRoleService;
 
 @RestController
 @RequestMapping(value = "security/role")
-public class RoleController {
+public class RoleController extends BaseEntityController<Role> {
 	
 	@Autowired
-	private RoleRepository roleRepository;
+	private IRoleService service;
 	
 	@Autowired
-	private PermRepository permRepository;
+	private IPermService permService;
 	
-	@PreAuthorize("hasAuthority('jbf:security:role:save')")
-	@PostMapping(value = "save")
-	public Object save(@RequestBody Role role) {
-		roleRepository.save(role);
-		return role;
+	@Override
+	public IRoleService getService() {
+		return service;
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:role:list')")
-	@GetMapping(value = "get/{id}")
-	public Object get(@PathVariable Long id) {
-		return roleRepository.findById(id);
+	@Override
+	public String getPageList() {
+		return "security/role/list";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:role:edit')")
-	@PutMapping(value = "update")
-	public Object update(@RequestBody Role role) {
-		if (role.getId() == null) {
-			return null;
-		}
-		Optional<Role> optional = roleRepository.findById(role.getId());
-		if (!optional.isPresent()) {
-			return null;
-		}
-		Role old = optional.get();
-		old.setRolename(role.getRolename());
-		old.setNickname(role.getNickname());
-		old.setDescription(role.getDescription());
-		roleRepository.save(old);
-		return old;
+	@Override
+	public String getPageAdd() {
+		return "security/role/add";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:role:delete')")
-	@DeleteMapping(value = "delete/{id}")
-	public Object delete(@PathVariable Long id) {
-		try {
-			roleRepository.deleteById(id);
-		} catch (EmptyResultDataAccessException e) {
-			return false;
-		}
-		return true;
+	@Override
+	public String getPageEdit() {
+		return "security/role/edit";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:role:list')")
-	@GetMapping(value = "list")
-	public ModelAndView list() {
-		return new ModelAndView("security/role/list");
+	@Override
+	public String getViewPerm() {
+		return "jbf:security:role:list";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:role:list')")
-	@GetMapping(value = "findPage/{page}/{size}")
-	public Object findPage(@PathVariable int page, @PathVariable int size) {
-		Sort sort = Sort.by(Direction.DESC, "id");
-		Pageable pageable = PageRequest.of(page, size, sort);
-		return roleRepository.findAll(pageable);
+	@Override
+	public String getSavePerm() {
+		return "jbf:security:role:save";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:role:save')")
-	@GetMapping(value = "add")
-	public ModelAndView add() {
-		return new ModelAndView("security/role/add");
+	@Override
+	public String getEditPerm() {
+		return "jbf:security:role:edit";
 	}
 	
-	@PreAuthorize("hasAuthority('jbf:security:role:edit')")
-	@GetMapping(value = "edit/{id}")
-	public ModelAndView edit(@PathVariable Long id) {
-		return new ModelAndView("security/role/edit");
+	@Override
+	public String getDeletePerm() {
+		return "jbf:security:role:delete";
 	}
+	
+	@Override
+	public void updateOld(Role old, Role entity) {
+		old.setRolename(entity.getRolename());
+		old.setNickname(entity.getNickname());
+		old.setDescription(entity.getDescription());
+	}
+	
 	
 	@PreAuthorize("hasAuthority('jbf:security:role:assignPerm')")
 	@GetMapping(value = "findRoleUnAssignPerms/{roleId}/{page}/{size}")
 	public Object findRoleUnAssignPerms(@PathVariable Long roleId, @PathVariable int page, @PathVariable int size) {
 		Sort sort = Sort.by(Direction.DESC, "id");
 		Pageable pageable = PageRequest.of(page, size, sort);
-		return roleRepository.findRoleUnAssignPerms(roleId, pageable);
+		return service.findRoleUnAssignPerms(roleId, pageable);
 	}
 	
 	@PreAuthorize("hasAuthority('jbf:security:role:assignPerm')")
 	@PostMapping(value = "assignPerm")
 	public Object assignPerm(Long roleId, Long permId) {
-		Role role = roleRepository.getOne(roleId);
-		Perm perm = permRepository.getOne(permId);
+		Role role = service.get(roleId);
+		Perm perm = permService.get(permId);
 		role.getPerms().add(perm);
-		roleRepository.save(role);
+		service.save(role);
 		return perm;
 	}
 	
 	@PreAuthorize("hasAuthority('jbf:security:role:assignPerm')")
 	@PostMapping(value = "removePerm")
 	public Object removePerm(Long roleId, Long permId) {
-		Role role = roleRepository.getOne(roleId);
-		Perm perm = permRepository.getOne(permId);
+		Role role = service.get(roleId);
+		Perm perm = permService.get(permId);
 		Set<Perm> perms = role.getPerms();
 		for (Perm p : perms) {
 			if (p.getId().equals(permId)) {
@@ -135,14 +110,14 @@ public class RoleController {
 				break;
 			}
 		}
-		roleRepository.save(role);
+		service.save(role);
 		return perm;
 	}
 	
 	@PreAuthorize("hasAuthority('jbf:security:role:assignMenu')")
 	@PostMapping(value = "updateMenus")
 	public Object updateMenus(Long roleId, Long[] menuIds) {
-		Role role = roleRepository.getOne(roleId);
+		Role role = service.get(roleId);
 		if (menuIds == null || menuIds.length == 0) {
 			role.setMenus(null);
 		} else {
@@ -154,7 +129,7 @@ public class RoleController {
 			}
 			role.setMenus(menus);
 		}
-		roleRepository.save(role);
+		service.save(role);
 		return role;
 	}
 }
