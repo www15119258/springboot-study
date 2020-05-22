@@ -75,7 +75,6 @@ public class PostController extends BaseEntityController<Post> {
 		old.setSummary(entity.getSummary());
 		old.setAuthor(entity.getAuthor());
 		old.setPublishDate(entity.getPublishDate());
-		old.setCategorys(entity.getCategorys());
 	}
 	
 	@Override
@@ -95,7 +94,6 @@ public class PostController extends BaseEntityController<Post> {
 		return service.findByAuthorAndTitle(author, title, pageable);
 	}
 
-	@PreAuthorize("hasAnyAuthority('jbf:cms:post:save', 'jbf:cms:post:edit')")
 	@PostMapping(value = "updateCategorys")
 	public Object updateCategorys(Long postId, Long[] categoryIds) {
 		Post post = service.get(postId);
