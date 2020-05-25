@@ -4,7 +4,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -14,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import com.cangzhitao.springboot.study.filter.ForbiddenFilter;
 
 @Configuration
 public class WebConfiguration extends WebMvcConfigurationSupport {
@@ -47,6 +51,16 @@ public class WebConfiguration extends WebMvcConfigurationSupport {
         	.addResourceLocations("classpath:/static/")
         	.addResourceLocations("classpath:/public/");
 		super.addResourceHandlers(registry);
+	}
+	
+	@Bean
+	public FilterRegistrationBean<ForbiddenFilter> forbiddenFilter() {
+		FilterRegistrationBean<ForbiddenFilter> frBean = new FilterRegistrationBean<>();
+		ForbiddenFilter ff = new ForbiddenFilter();
+		frBean.setFilter(ff);
+		frBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+		frBean.addUrlPatterns("/login.do");
+		return frBean;
 	}
 
 	
