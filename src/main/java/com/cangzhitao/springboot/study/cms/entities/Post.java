@@ -58,6 +58,8 @@ public class Post extends BaseEntity {
 	@JoinTable(name = "cms_post_category", joinColumns = @JoinColumn(name = "fk_post"), inverseJoinColumns = @JoinColumn(name = "fk_category"))
 	private Set<Category> categorys;
 	
+	private Integer views = 0;
+	
 	public String getTitle() {
 		return title;
 	}
@@ -104,6 +106,17 @@ public class Post extends BaseEntity {
 
 	public void setCategorys(Set<Category> categorys) {
 		this.categorys = categorys;
+	}
+
+	public Integer getViews() {
+		if (views == null) {
+			return 0;
+		}
+		return views;
+	}
+
+	public void setViews(Integer views) {
+		this.views = views;
 	}
 	
 }
