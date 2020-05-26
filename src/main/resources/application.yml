@@ -9,6 +9,8 @@ spring:
     open-in-view: true
     generate_ddl: true
     show_sql: true
+    database: MYSQL
+    database_platform: org.hibernate.dialect.MySQL5InnoDBDialect
     properties:
       hibernate:
         enable_lazy_load_no_trans: true
