@@ -1,5 +1,7 @@
 package com.cangzhitao.springboot.study.cms.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,5 +13,7 @@ public interface IPostService extends IBaseService<Post> {
 	public Page<Post> findByAuthorAndTitle(String author, String title, Pageable pageable);
 	
 	public Page<Post> findByCategory(Long categoryId, Pageable pageable);
+	
+	public List<Post> findByCategoryRandom(Long categoryId, int top);
 
 }

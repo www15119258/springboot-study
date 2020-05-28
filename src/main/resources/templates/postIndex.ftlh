@@ -31,30 +31,19 @@
 		</el-menu>
 		<el-row :gutter="20">
 		  <el-col :span="18">
-		  	<h2>当前分类：{{category.name}}</h2>
-		  	<div v-for="post in posts">
-		  		<h1><a :href="'/post/' + post.id">{{post.title}}</a></h1>
+		  	<div>
+		  		<h1>{{post.title}}</h1>
 		  		<h3>{{post.author}} {{post.publishDate}}
 		  		 <a :href="'/category/' + category.id" v-for="category in post.categorys">{{category.name}}</a>
 		  		</h3>
-		  		<div v-html="post.summary">
+		  		<div v-html="post.content">
 		  		</div>
-		  	</div>
-		  	<div class="block">
-		    	<el-pagination
-	  				@size-change="handleSizeChange"
-	  				@current-change="handleCurrentChange"
-	  				:current-page="currentPage"
-	  				:page-size="pageSize"
-	  				layout="total, prev, pager, next"
-	  				:total="total">
-		    	</el-pagination>
 		  	</div>
 		  </el-col>
 		  <el-col :span="6">
 		  	<div>
-		  		<h2>热门文章</h2>
-		  		<h3 v-for="post in topPosts">{{post.title}} ({{post.views}})</h3>
+		  		<h2>推荐文章</h2>
+		  		<h3 v-for="post in posts">{{post.title}} ({{post.views}})</h3>
 		  	</div>
 		  </el-col>
 		</el-row>
@@ -74,11 +63,7 @@
         		return { 
         			categorys: [],
         			posts: [],
-        			currentPage: 1,
-        			pageSize: 10,
-        			total: 0,
-        			topPosts: [],
-        			category: {}
+        			post: {}
         		}
       		},
       		methods: {
@@ -89,33 +74,21 @@
 			        	window.location = '/category/' + key;
       				}
 		      	},
-		      	handleSizeChange(val) {
-      				this.pageSize = val;
-      				this.queryPost();
-      			},
-      			handleCurrentChange(val) {
-      				this.currentPage = val;
-      				this.queryPost();
-      			},
       			queryPost() {
-      				axios.get('/post/findPageByCategory/' + this.category.id + '/' + (this.currentPage - 1) + '/' + this.pageSize).then((response) => {
-	      				this.posts = response.data.content;
-	      				this.total = response.data.totalElements;
+      				axios.get('/post/recommend/' + this.post.id).then((response) => {
+	      				this.posts = response.data;
 	      			});
       			}
       		},
       		mounted() {
       			let paths = document.location.href.split('/');
       			let id = paths[paths.length - 1];
-      			axios.get('/category/get/' + id).then((response) => {
-      				this.category = response.data;
-      				if (this.category === '') {
+      			axios.get('/post/get/' + id).then((response) => {
+      				this.post = response.data;
+      				if (this.post === '') {
       					window.location = '/';
       				} else {
       					this.queryPost();
-		      			axios.get('/category/hots/' + this.category.id).then((response) => {
-		      				this.topPosts = response.data;
-		      			});
       				}
       			});
       			axios.get('/getCategoryTree').then((response) => {

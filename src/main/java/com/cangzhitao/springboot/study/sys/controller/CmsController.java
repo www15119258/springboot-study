@@ -3,6 +3,7 @@ package com.cangzhitao.springboot.study.sys.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.cangzhitao.springboot.study.cms.entities.Category;
 import com.cangzhitao.springboot.study.cms.entities.Post;
 import com.cangzhitao.springboot.study.cms.service.ICategoryService;
 import com.cangzhitao.springboot.study.cms.service.IPostService;
@@ -123,6 +125,48 @@ public class CmsController {
 		Pageable pageable = PageRequest.of(0, 10, sort);
 		Page<Post> p = postService.findByCategory(category, pageable);
 		return p.getContent();
+	}
+	
+	@GetMapping(value = "/post/{id}")
+	public ModelAndView postIndex(@PathVariable Long id) {
+		return new ModelAndView("postIndex");
+	}
+	
+	@GetMapping(value = "/post/get/{id}")
+	public Object postGetById(@PathVariable Long id) {
+		return postService.get(id);
+	}
+	
+	@GetMapping(value = "/post/recommend/{post}")
+	public Object postRecommend(@PathVariable Long post) {
+		Post spost = postService.get(post);
+		if (spost == null) {
+			return new ArrayList<>();
+		}
+		Set<Category> categorys = spost.getCategorys();
+		if (categorys == null || categorys.isEmpty()) {
+			Pageable pageable = PageRequest.of(0, 10);
+			String hql = "select p from Post p order by rand()";
+			String countHql = "select count(p) from Post p";
+			Page<Post> p = postService.findAll(hql, new Object[] {}, countHql, new Object[] {}, pageable);
+			return p.getContent();
+		}
+		Integer maxLevel = -1;
+		Long maxCategoryId = null;
+		for (Category category : categorys) {
+			int level = 0;
+			Category parent = null;
+			Category temp = category;
+			while((parent = temp.getParent()) != null) {
+				level++;
+				temp = parent;
+			}
+			if (level > maxLevel) {
+				maxLevel = level;
+				maxCategoryId = category.getId();
+			}
+		}
+		return postService.findByCategoryRandom(maxCategoryId, 10);
 	}
 	
 }

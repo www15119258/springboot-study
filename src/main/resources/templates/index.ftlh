@@ -32,7 +32,7 @@
 		<el-row :gutter="20">
 		  <el-col :span="18">
 		  	<div v-for="post in posts">
-		  		<h1>{{post.title}}</h1>
+		  		<h1><a :href="'/post/' + post.id">{{post.title}}</a></h1>
 		  		<h3>{{post.author}} {{post.publishDate}}
 		  		 <a :href="'/category/' + category.id" v-for="category in post.categorys">{{category.name}}</a>
 		  		</h3>

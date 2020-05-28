@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
@@ -99,6 +100,18 @@ public class PostService extends BaseService<Post> implements IPostService {
 		String hql = "select distinct p from Post p join p.categorys c where c.id in ?0";
 		String countHql = "select count(distinct p) from Post p join p.categorys c where c.id in ?0";
 		return findAll(hql, new Object[] { idList }, countHql, new Object[] { idList }, pageable);
+	}
+	
+	@Override
+	public List<Post> findByCategoryRandom(Long categoryId, int top) {
+		List<Category> categorys = categoryService.getSubTree(categoryId, true);
+		List<Long> idList = new ArrayList<>();
+		categorys.forEach(category -> idList.add(category.getId()));
+		idList.add(categoryId);
+		String hql = "select distinct p from Post p join p.categorys c where c.id in ?0 order by rand()";
+		String countHql = "select count(distinct p) from Post p join p.categorys c where c.id in ?0";
+		Pageable pageable = PageRequest.of(0, top);
+		return findAll(hql, new Object[] { idList }, countHql, new Object[] { idList }, pageable).getContent();
 	}
 
 }
