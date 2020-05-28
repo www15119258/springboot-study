@@ -81,4 +81,48 @@ public class CmsController {
 		return p.getContent();
 	}
 	
+	@GetMapping(value = "/category/{id}")
+	public ModelAndView categoryIndex(@PathVariable Long id) {
+		return new ModelAndView("categoryIndex");
+	}
+	
+	@GetMapping(value = "/category/get/{id}")
+	public Object categoryGetById(@PathVariable Long id) {
+		return categoryService.get(id);
+	}
+	
+	@GetMapping(value = "/post/findPageByCategory/{category}/{page}/{size}")
+	public Object findPostPageByCategory(@PathVariable Long category, @PathVariable int page, @PathVariable int size) {
+		Sort sort = Sort.by(Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(page, size, sort);
+		Page<Post> p = postService.findByCategory(category, pageable);
+		List<Long> idList = new ArrayList<>();
+		p.getContent().forEach(post -> {
+			if (post.getCreateBy() != null) {
+				idList.add(post.getCreateBy());
+			}
+		});
+		List<User> users = new ArrayList<>();
+		if (!idList.isEmpty()) {
+			users = userService.findByIds(idList);
+		}
+		Map<Long, String> usernameMap = users.stream().collect(Collectors.toMap(User::getId, User::getUsername));
+		p.getContent().forEach(post -> {
+			String username = usernameMap.get(post.getCreateBy());
+			if (StringUtils.isEmpty(username)) {
+				username = "佚名";
+			}
+			post.setAuthor(username);
+		});
+		return p;
+	}
+	
+	@GetMapping(value = "/category/hots/{category}")
+	public Object categoryHots(@PathVariable Long category) {
+		Sort sort = Sort.by(Direction.DESC, "views");
+		Pageable pageable = PageRequest.of(0, 10, sort);
+		Page<Post> p = postService.findByCategory(category, pageable);
+		return p.getContent();
+	}
+	
 }

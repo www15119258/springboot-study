@@ -11,6 +11,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import com.cangzhitao.springboot.study.base.repository.BaseRepository;
 import com.cangzhitao.springboot.study.base.service.BaseService;
+import com.cangzhitao.springboot.study.cms.entities.Category;
 import com.cangzhitao.springboot.study.cms.entities.Post;
 import com.cangzhitao.springboot.study.cms.repository.PostRepository;
 
@@ -28,6 +30,10 @@ public class PostService extends BaseService<Post> implements IPostService {
 	
 	@Autowired
 	private PostRepository repository;
+	
+	@Autowired
+	@Lazy
+	private ICategoryService categoryService;
 
 	@Override
 	public BaseRepository<Post> getRepository() {
@@ -82,6 +88,17 @@ public class PostService extends BaseService<Post> implements IPostService {
 		}
 		Long count = this.entityManager.createQuery(countQuery).getSingleResult();
 		return new PageImpl<>(list, pageable, count);
+	}
+
+	@Override
+	public Page<Post> findByCategory(Long categoryId, Pageable pageable) {
+		List<Category> categorys = categoryService.getSubTree(categoryId, true);
+		List<Long> idList = new ArrayList<>();
+		categorys.forEach(category -> idList.add(category.getId()));
+		idList.add(categoryId);
+		String hql = "select distinct p from Post p join p.categorys c where c.id in ?0";
+		String countHql = "select count(distinct p) from Post p join p.categorys c where c.id in ?0";
+		return findAll(hql, new Object[] { idList }, countHql, new Object[] { idList }, pageable);
 	}
 
 }

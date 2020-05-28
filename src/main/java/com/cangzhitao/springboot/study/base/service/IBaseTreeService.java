@@ -26,4 +26,12 @@ public interface IBaseTreeService<T extends BaseTreeEntity<T>> extends IBaseServ
 	 */
 	public List<T> getSubTree(Long id);
 	
+	/**
+	 * 查询子节点
+	 * @param id
+	 * @param recursion 是否需要递归
+	 * @return
+	 */
+	public List<T> getSubTree(Long id, boolean recursion);
+	
 }

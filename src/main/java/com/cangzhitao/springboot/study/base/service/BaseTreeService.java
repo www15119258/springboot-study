@@ -43,6 +43,25 @@ public abstract class BaseTreeService<T extends BaseTreeEntity<T>> extends BaseS
 		return typedQuery.getResultList();
 	}
 
+	@Override
+	public List<T> getSubTree(Long id, boolean recursion) {
+		if (!recursion) {
+			return this.getSubTree(id);
+		}
+		List<T> result = new ArrayList<>();
+		List<T> list = this.getSubTree(id);
+		if (list != null && !list.isEmpty()) {
+			result.addAll(list);
+		}
+		for (T t : list) {
+			List<T> children = this.getSubTree(t.getId(), true);
+			if (children != null && !children.isEmpty()) {
+				result.addAll(children);
+			}
+		}
+		return result;
+	}
+	
 	private List<T> listToTree(List<T> list) {
 		List<T> tree = new ArrayList<>();
 		Map<Long, T> map = new HashMap<>();

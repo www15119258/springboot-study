@@ -31,6 +31,7 @@
 		</el-menu>
 		<el-row :gutter="20">
 		  <el-col :span="18">
+		  	<h2>当前分类：{{category.name}}</h2>
 		  	<div v-for="post in posts">
 		  		<h1>{{post.title}}</h1>
 		  		<h3>{{post.author}} {{post.publishDate}}
@@ -76,7 +77,8 @@
         			currentPage: 1,
         			pageSize: 10,
         			total: 0,
-        			topPosts: []
+        			topPosts: [],
+        			category: {}
         		}
       		},
       		methods: {
@@ -96,19 +98,28 @@
       				this.queryPost();
       			},
       			queryPost() {
-      				axios.get('/post/findPage/' + (this.currentPage - 1) + '/' + this.pageSize).then((response) => {
+      				axios.get('/post/findPageByCategory/' + this.category.id + '/' + (this.currentPage - 1) + '/' + this.pageSize).then((response) => {
 	      				this.posts = response.data.content;
 	      				this.total = response.data.totalElements;
 	      			});
       			}
       		},
       		mounted() {
+      			let paths = document.location.href.split('/');
+      			let id = paths[paths.length - 1];
+      			axios.get('/category/get/' + id).then((response) => {
+      				this.category = response.data;
+      				if (this.category === '') {
+      					window.location = '/';
+      				} else {
+      					this.queryPost();
+		      			axios.get('/category/hots/' + this.category.id).then((response) => {
+		      				this.topPosts = response.data;
+		      			});
+      				}
+      			});
       			axios.get('/getCategoryTree').then((response) => {
       				this.categorys = response.data;
-      			});
-      			this.queryPost();
-      			axios.get('/post/hots').then((response) => {
-      				this.topPosts = response.data;
       			});
       		}
     	})
