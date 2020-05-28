@@ -1,6 +1,7 @@
 package com.cangzhitao.springboot.study.cms.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,6 +15,9 @@ public class CategoryController extends BaseTreeEntityController<Category> {
 	
 	@Autowired
 	private ICategoryService service;
+	
+	@Autowired
+	private CacheManager cacheManager;
 	
 	public ICategoryService getService() {
 		return service;
@@ -58,5 +62,25 @@ public class CategoryController extends BaseTreeEntityController<Category> {
 	public void updateOld(Category old, Category entity) {
 		old.setName(entity.getName());
 	}
+
+	@Override
+	public void afterSave(Category entity) {
+		super.afterSave(entity);
+		cacheManager.getCache("category").evict("tree");
+	}
+
+	@Override
+	public void afterUpdate(Category entity) {
+		super.afterUpdate(entity);
+		cacheManager.getCache("category").evict("tree");
+	}
+
+	@Override
+	public void afterDelete(Long id) {
+		super.afterDelete(id);
+		cacheManager.getCache("category").evict("tree");
+	}
+	
+	
 
 }

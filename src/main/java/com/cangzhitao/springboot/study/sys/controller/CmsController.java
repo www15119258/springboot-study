@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,14 +40,39 @@ public class CmsController {
 	@Autowired
 	private IUserService userService;
 	
+	@Autowired
+	private CacheManager cacheManager;
+	
+	public CmsController() {
+		new Thread(() -> {
+			while(true) {
+				try {
+					Thread.sleep(60000);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+				List<Category> tree = categoryService.getTree();
+				cacheManager.getCache("category").put("tree", tree);
+			}
+		}).start();
+	}
+	
 	@GetMapping(value = "/")
 	public ModelAndView index() {
 		return new ModelAndView("index");
 	}
 	
+	@SuppressWarnings("unchecked")
 	@GetMapping(value = "/getCategoryTree")
 	public Object getCategoryTree() {
-		return categoryService.getTree();
+		List<Category> tree = null;
+		tree = cacheManager.getCache("category").get("tree", List.class);
+		if (tree != null) {
+			return tree;
+		}
+		tree = categoryService.getTree();
+		cacheManager.getCache("category").put("tree", tree);
+		return tree;
 	}
 	
 	@GetMapping(value = "/post/findPage/{page}/{size}")
