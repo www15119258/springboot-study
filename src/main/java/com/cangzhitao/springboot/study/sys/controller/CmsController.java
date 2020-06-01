@@ -43,6 +43,7 @@ public class CmsController {
 	@Autowired
 	private CacheManager cacheManager;
 	
+	/**
 	public CmsController() {
 		new Thread(() -> {
 			while(true) {
@@ -55,7 +56,7 @@ public class CmsController {
 				cacheManager.getCache("category").put("tree", tree);
 			}
 		}).start();
-	}
+	}*/
 	
 	@GetMapping(value = "/")
 	public ModelAndView index() {

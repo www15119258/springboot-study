@@ -20,6 +20,10 @@ spring:
     user:
       name: admin
       password: 123456
+  task:
+    scheduling:
+      pool:
+        size: 2
 logging:
   level:
     root: info
