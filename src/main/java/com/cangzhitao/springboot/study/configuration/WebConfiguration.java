@@ -63,14 +63,4 @@ public class WebConfiguration extends WebMvcConfigurationSupport {
 		return frBean;
 	}
 
-	@Bean
-	public FilterRegistrationBean<CoreFilter> CoreFilter() {
-		FilterRegistrationBean<CoreFilter> frBean = new FilterRegistrationBean<>();
-		CoreFilter ff = new CoreFilter();
-		frBean.setFilter(ff);
-		frBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-		frBean.addUrlPatterns("/*");
-		return frBean;
-	}
-	
 }
